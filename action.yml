@@ -1,0 +1,15 @@
+name: 'Build AUR package & push to AUR'
+description: 'Build an AUR package, test it and optionally push to the AUR'
+branding:
+  icon: user-check
+  color: gray-dark
+inputs:
+  push-to-aur:
+    description: 'Push changes to the AUR'
+    required: false
+    default: 'false'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.push-to-aur }}
