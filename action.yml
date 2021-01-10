@@ -1,4 +1,4 @@
-name: 'Build AUR package & push to AUR'
+name: 'Build AUR package & push to the AUR'
 description: 'Build an AUR package, test it and optionally push to the AUR'
 branding:
   icon: user-check
@@ -8,6 +8,10 @@ inputs:
     description: 'Push changes to the AUR'
     required: false
     default: 'false'
+  personal-access-token:
+    description: 'Github access token'
+    required: false
+    default: ''
 runs:
   using: 'docker'
   image: 'Dockerfile'
