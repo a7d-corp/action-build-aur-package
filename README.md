@@ -1,1 +1,1 @@
-# build-aur-package
+# build-aur-package-action
