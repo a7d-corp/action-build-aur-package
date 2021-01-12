@@ -5,13 +5,18 @@ set -o pipefail
 
 main() {
   # set working directory to the workdir provided in the workflow config
-  WORKDIR="$(pwd)/${1}"
+  WORKDIR="$(pwd)/${INPUT_WORKDIR}"
 
   # all further operations are relative to this directory
   cd "${WORKDIR}"
 
   # sanity check required files
   check_requirements
+
+  # install any additional packages provided in the workflow config
+  if [ ! -z "${INPUT_ADDITIONALPACKAGES}" ] ; then
+    install_packages "${INPUT_ADDITIONALPACKAGES}"
+  fi
 
   # prep SSH
   prepare_ssh
@@ -69,24 +74,27 @@ main() {
   # test installing package
   find -name \*pkg.tar.zst -exec pacman -U {} \;
 
-  # update .SRCINFO
-  makepkg --printsrcinfo > .SRCINFO
-
   # prepare git config
   git config --global user.email "${GIT_EMAIL}"
   git config --global user.name "${GIT_USER}"
 
-  # add files for committing
-  if ! git add PKGBUILD .SRCINFO ; then
-    err "Couldn't add files for committing"
-  fi
+  # if pushToAur input is 'true'
+  if [ "${INPUT_PUSHTOAUR}" == "true" ] ; then
+    # update .SRCINFO
+    makepkg --printsrcinfo > .SRCINFO
 
-  # commit changes
-  git commit -m "bump to ${LATEST_TAG}"
+    # add files for committing
+    if ! git add PKGBUILD .SRCINFO ; then
+      err "Couldn't add files for committing"
+    fi
 
-  # push changes to the AUR
-  if ! git push ; then
-    err "Couldn't push commit to the AUR"
+    # commit changes
+    git commit -m "bump to ${LATEST_TAG}"
+
+    # push changes to the AUR
+    if ! git push ; then
+      err "Couldn't push commit to the AUR"
+    fi
   fi
 
   # change directory back to the working directory
@@ -141,6 +149,14 @@ check_requirements() {
   # check the vars file contains the requirements
   if ! grep -qE 'UPSTREAM|AUR|PKG|STUB' VARS.env; then
     err "required variable not set in VARS.env file"
+  fi
+}
+
+install_packages() {
+  # takes one input and exits non-zero if packages fail to install
+  # $1 - space-separated list of packages to install
+  if ! pacman -Syuq --noconfirm --noconfirm "${1}" ; then
+    err "Failed to install additional packages"
   fi
 }
 

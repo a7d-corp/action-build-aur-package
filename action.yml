@@ -4,18 +4,18 @@ branding:
   icon: user-check
   color: gray-dark
 inputs:
+  additionalPackages:
+    description: 'Space-separated list of additional packages to install'
+    required: false
+    default: ''
+  pushToAur:
+    description: 'Push changes to the AUR'
+    required: false
+    default: 'false'
   workdir:
     description: 'The directory to work in'
     required: false
     default: './'
-  push-to-aur:
-    description: 'Push changes to the AUR'
-    required: false
-    default: 'false'
 runs:
   using: 'docker'
   image: 'Dockerfile'
-  args:
-    - ${{ inputs.workdir }}
-  env:
-    PUSH_TO_AUR: ${{ inputs.push-to-aur }}
