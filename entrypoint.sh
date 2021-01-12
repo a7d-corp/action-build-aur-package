@@ -109,10 +109,18 @@ get_asset_url() {
   # $1 - repo in format 'org/repo'
   # $2 - asset file name stub to match
 
-  curl --silent \
-    "https://api.github.com/repos/${1}/releases/latest" \
-    | jq -r --arg ASSET_FILE "${2}" \
-    '.assets[] | select(.name | contains($ASSET_FILE)) | .browser_download_url'
+  if [ ! -z "${GITHUB_TOKEN}" ]; then
+    curl --silent \
+      -H "Authorization: token ${GITHUB_TOKEN}"
+      "https://api.github.com/repos/${1}/releases/latest" \
+      | jq -r --arg ASSET_FILE "${2}" \
+      '.assets[] | select(.name | contains($ASSET_FILE)) | .browser_download_url'
+  else
+    curl --silent \
+      "https://api.github.com/repos/${1}/releases/latest" \
+      | jq -r --arg ASSET_FILE "${2}" \
+      '.assets[] | select(.name | contains($ASSET_FILE)) | .browser_download_url'
+  fi
 }
 
 compare_versions() {

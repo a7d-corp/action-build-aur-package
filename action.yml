@@ -8,12 +8,14 @@ inputs:
     description: 'Push changes to the AUR'
     required: false
     default: 'false'
-  personal-access-token:
+  github-token:
     description: 'Github access token'
     required: false
     default: ''
 runs:
   using: 'docker'
   image: 'Dockerfile'
-  args:
-    - ${{ inputs.push-to-aur }}
+  entrypoint: '/entrypoint.sh'
+  env:
+    PUSH_TO_AUR: ${{ inputs.push-to-aur }}
+    GITHUB_TOKEN: ${{ inputs.github-token }}
