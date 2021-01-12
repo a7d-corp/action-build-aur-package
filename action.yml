@@ -11,6 +11,5 @@ inputs:
 runs:
   using: 'docker'
   image: 'Dockerfile'
-  entrypoint: '/entrypoint.sh'
   env:
     PUSH_TO_AUR: ${{ inputs.push-to-aur }}
