@@ -4,8 +4,12 @@ set -o errexit
 set -o pipefail
 
 main() {
-  ls "${1}"
-  exit 0
+  # set working directory to the workdir provided in the workflow config
+  WORKDIR="$(pwd)/${1}"
+
+  # all further operations are relative to this directory
+  cd "${WORKDIR}"
+
   # sanity check required files
   check_requirements
 
@@ -72,14 +76,36 @@ main() {
   git config --global user.email "${GIT_EMAIL}"
   git config --global user.name "${GIT_USER}"
 
+  # add files for committing
   if ! git add PKGBUILD .SRCINFO ; then
     err "Couldn't add files for committing"
   fi
 
+  # commit changes
   git commit -m "bump to ${LATEST_TAG}"
 
+  # push changes to the AUR
   if ! git push ; then
     err "Couldn't push commit to the AUR"
+  fi
+
+  # change directory back to the working directory
+  cd "${WORKDIR}"
+
+  # update repo with the latest built version
+  echo "CURRENT_VERSION=${LATEST_TAG}" > VERSION.env
+
+  # add the updated file for committing
+  if ! git add VERSION.env ; then
+    err "Couldn't update VERSION.env"
+  fi
+
+  # commit the file back
+  git commit -m "update latest version to ${LATEST_TAG}"
+
+  # push changes to the repo
+  if ! git push ; then
+    err "Couldn't push commit"
   fi
 }
 
