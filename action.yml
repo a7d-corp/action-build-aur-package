@@ -4,6 +4,10 @@ branding:
   icon: user-check
   color: gray-dark
 inputs:
+  workdir:
+    description: 'The directory to work in'
+    required: false
+    default: './'
   push-to-aur:
     description: 'Push changes to the AUR'
     required: false
@@ -11,5 +15,7 @@ inputs:
 runs:
   using: 'docker'
   image: 'Dockerfile'
+  args:
+    - ${{ inputs.workdir }}
   env:
     PUSH_TO_AUR: ${{ inputs.push-to-aur }}

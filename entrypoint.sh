@@ -4,7 +4,7 @@ set -o errexit
 set -o pipefail
 
 main() {
-  ls .
+  ls "${1}"
   exit 0
   # sanity check required files
   check_requirements
