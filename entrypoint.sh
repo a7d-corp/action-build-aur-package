@@ -46,6 +46,7 @@ main() {
   check_response "${ASSET_SHA}" ASSET_SHA
 
   # clone aur repo
+  export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i $HOME/.ssh/ssh_key"
   if ! git clone "${AUR_REPO}" aur_repo; then
     err "failed to clone AUR repo"
   fi
@@ -111,6 +112,9 @@ main() {
   # commit the file back
   git commit -m "update latest version to ${LATEST_TAG}"
 
+  # don't use AUR-specific SSH command
+  unset GIT_SSH_COMMAND
+
   # push changes to the repo
   if ! git push ; then
     err "Couldn't push commit"
@@ -168,13 +172,16 @@ prepare_ssh() {
   fi
 
   # pull down the public key(s) from the AUR servers
-  if ! ssh-keyscan aur.archlinux.org > $HOME/.ssh/known_hosts ; then
+  if ! ssh-keyscan -H aur.archlinux.org > $HOME/.ssh/known_hosts ; then
     err "Couldn't get SSH public key from AUR servers"
   fi
 
   # write the private SSH key out to disk
   if [ ! -z "${AUR_SSH_KEY}" ] ; then
+    # write the key out to disk
     echo "${AUR_SSH_KEY}" > $HOME/.ssh/ssh_key
+
+    # ensure correct permissions
     chmod 0400 $HOME/.ssh/ssh_key
   fi
 }
