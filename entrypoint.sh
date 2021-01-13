@@ -67,7 +67,7 @@ main() {
 
   # clone aur repo
   log "Cloning AUR repo into ./aur_repo"
-  export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i $HOME/.ssh/ssh_key"
+  export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=$HOME/.ssh/known_hosts -i $HOME/.ssh/ssh_key"
   if ! git clone "${AUR_REPO}" aur_repo; then
     err "failed to clone AUR repo"
   fi
@@ -89,9 +89,9 @@ main() {
     err "PKGBUILD failed namcap check"
   fi
 
-  # build package
-  log "Building package file"
-  makepkg
+  # build package as non-root user
+  log "Building package file as user notroot"
+  su notroot -c "makepkg"
 
   # store the package file name
   BUILT_PKG_FILE=$(find -name \*pkg.tar.zst)
