@@ -153,6 +153,7 @@ main() {
   cd "${WORKDIR}"
 
   # update repo with the latest built version
+  log "Updating source repo with the latest version"
   echo "CURRENT_VERSION=${LATEST_TAG}" > VERSION.env
 
   # add the updated file for committing
@@ -160,7 +161,7 @@ main() {
   if ! git add VERSION.env ; then
     err "Couldn't add VERSION.env"
   fi
-  sleep 10h
+
   # commit the file back
   log "Committing changes"
   git commit -m "update latest version to ${LATEST_TAG}"
@@ -173,6 +174,7 @@ main() {
   #if ! git push ; then
   #  err "Couldn't push commit"
   #fi
+  sleep 10h
 }
 
 # helper functions
