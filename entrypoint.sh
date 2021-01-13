@@ -59,7 +59,7 @@ main() {
 
   # sha256sum the asset file
   log "Compute sha256sum of the asset file"
-  ASSET_SHA=$(sha256sum tmp_asset_file)
+  ASSET_SHA=$(sha256sum tmp_asset_file | cut -d ' ' -f 1)
   check_response "${ASSET_SHA}" ASSET_SHA
 
   # expose the asset file SHA to the workflow output
