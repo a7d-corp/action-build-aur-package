@@ -27,6 +27,12 @@ main() {
   # pick up variables needed to run
   source VARS.env
 
+  # expose the sourced vars to the workflow output
+  set_output "UPSTREAM_REPO" "${UPSTREAM_REPO}"
+  set_output "AUR_REPO" "${AUR_REPO}"
+  set_output "PKG_NAME" "${PKG_NAME}"
+  set_output "ASSET_FILE_STUB" "${ASSET_FILE_STUB}"
+
   # get tag of the latest version
   log "Getting latest tag from Github API"
   LATEST_TAG=$(get_latest_version "${UPSTREAM_REPO}")
@@ -91,7 +97,7 @@ main() {
   if ! namcap PKGBUILD ; then
     err "PKGBUILD failed namcap check"
   fi
- sleep 10h
+
   # build package as non-root user
   log "Building package file as user notroot"
   su notroot -c "makepkg"
@@ -205,12 +211,6 @@ check_requirements() {
   if ! grep -qE 'UPSTREAM|AUR|PKG|STUB' VARS.env; then
     err "required variable not set in VARS.env file"
   fi
-
-  # expose the vars to the workflow output
-  set_output "UPSTREAM_REPO" "${UPSTREAM_REPO}"
-  set_output "AUR_REPO" "${AUR_REPO}"
-  set_output "PKG_NAME" "${PKG_NAME}"
-  set_output "ASSET_FILE_STUB" "${ASSET_FILE_STUB}"
 }
 
 install_packages() {
