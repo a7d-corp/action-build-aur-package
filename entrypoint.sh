@@ -42,7 +42,7 @@ main() {
   source VERSION.env
 
   # expose the current version to the workflow output
-  set_output "CURRENT_VER" "${CURRENT_VER}"
+  set_output "CURRENT_VERSION" "${CURRENT_VERSION}"
 
   # expose the latest vresion to the workflow output
   set_output "LATEST_VER" "${LATEST_TAG}"
