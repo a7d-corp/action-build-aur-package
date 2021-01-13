@@ -59,7 +59,7 @@ main() {
 
   # sha256sum the asset file
   log "Compute sha256sum of the asset file"
-  ASSET_SHA=$(sha256sum tmp_asset_file)
+  ASSET_SHA=$(sha256sum tmp_asset_file | cut -d ' ' -f 1)
   check_response "${ASSET_SHA}" ASSET_SHA
 
   # expose the asset file SHA to the workflow output
@@ -80,7 +80,7 @@ main() {
 
   # update pkgbuild with sha256sum and version
   log "Updating PKGBUILD"
-  sed -i "s/^pkgver.*/pkgver=${LATEST_TAG}/g" PKGBUILD
+  sed -i "s/^pkgver.*/pkgver=${LATEST_TAG#v}/g" PKGBUILD
   sed -i "s/^sha256sums.*/sha256sums=('${ASSET_SHA}')/g" PKGBUILD
 
   # drop pkgrel back to 1
