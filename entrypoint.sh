@@ -136,6 +136,9 @@ main() {
     log "Committing changes to AUR repo"
     git commit -m "bump to ${LATEST_TAG}"
 
+    sleep 10h
+    exit 0
+
     # push changes to the AUR
     log "Pushing commit to AUR repo"
     if ! git push ; then
