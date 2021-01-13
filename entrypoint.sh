@@ -18,6 +18,9 @@ main() {
     install_packages "${INPUT_ADDITIONALPACKAGES}"
   fi
 
+  # expose additional packages installed to the workflow output
+  set_output "ADDITIONAL_PACKAGES" "${INPUT_ADDITIONAL_PACKAGES}"
+
   # prep SSH
   prepare_ssh
 
@@ -27,6 +30,12 @@ main() {
   # get tag of the latest version
   LATEST_TAG=$(get_latest_version "${UPSTREAM_REPO}")
   check_response "${LATEST_TAG}" LATEST_TAG
+
+  # expose the current version to the workflow output
+  set_output "CURRENT_VER" "${CURRENT_VER}"
+
+  # expose the latest vresion to the workflow output
+  set_output "LATEST_VER" "${LATEST_TAG}"
 
   # pick up the version of the last package build
   source VERSION.env
@@ -38,12 +47,18 @@ main() {
   ASSET_URL=$(get_asset_url "${UPSTREAM_REPO}" "${ASSET_FILE_STUB}")
   check_response "${ASSET_URL}" ASSET_URL
 
+  # expose the asset URL to the workflow output
+  set_output "ASSET_URL" "${ASSET_URL}"
+
   # download the asset file
   wget "${ASSET_URL}" -O tmp_asset_file
 
   # sha256sum the asset file
   ASSET_SHA=$(sha256sum tmp_asset_file)
   check_response "${ASSET_SHA}" ASSET_SHA
+
+  # expose the asset file SHA to the workflow output
+  set_output "ASSET_SHA" "${ASSET_SHA}"
 
   # clone aur repo
   export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i $HOME/.ssh/ssh_key"
@@ -69,15 +84,27 @@ main() {
   # build package
   makepkg
 
+  # store the package file name
+  BUILT_PKG_FILE=$(find -name \*pkg.tar.zst)
+
+  # ensure a filename was discovered
+  check_response "${BUILT_PKG_FILE}" "BUILT_PKG_FILE"
+
+  # expose the built package name to the workflow output
+  set_output "BUILT_PKG_FILE" "${BUILT_PKG_FILE}"
+
   # check package file with namcap
-  find -name \*pkg.tar.zst -exec namcap {} \;
+  namcap "${BUILT_PKG_FILE}"
 
   # test installing package
-  find -name \*pkg.tar.zst -exec pacman -U {} \;
+  pacman -U "${BUILT_PKG_FILE}"
 
   # prepare git config
   git config --global user.email "${GIT_EMAIL}"
   git config --global user.name "${GIT_USER}"
+
+  #
+  set_output "PUSH_TO_AUR" "${INPUT_PUSH_TO_AUR}"
 
   # if pushToAur input is 'true'
   if [ "${INPUT_PUSHTOAUR}" == "true" ] ; then
@@ -122,20 +149,20 @@ main() {
 }
 
 # helper functions
-log() {
-  level=$1
-  shift 1
-  date -u +"%Y-%m-%dT%H:%M:%SZ" | tr -d '\n'
-  echo " [${level}] $@"
-}
-
 info() {
-  log "INFO" "$@"
+  echo "INFO: $@"
 }
 
 err() {
-  log "ERROR" "$@"
+  echo "ERROR: $@"
   exit 1
+}
+
+set_output() {
+  # takes two inputs and logs to stdout
+  # $1 - output name to set
+  # $2 - value of output to set
+  echo "::set-output name=${1}::${2}"
 }
 
 check_requirements() {
@@ -166,12 +193,15 @@ install_packages() {
 
 prepare_ssh() {
   # prepares the container for SSH
+  info "Preparing the container for SSH"
 
   if [ ! -d $HOME/.ssh ] ; then
+    info "Creating $HOME/.ssh"
     mkdir -m 0700 $HOME/.ssh
   fi
 
   # pull down the public key(s) from the AUR servers
+  info "Collecting SSH public key(s) from AUR server(s)"
   if ! ssh-keyscan -H aur.archlinux.org > $HOME/.ssh/known_hosts ; then
     err "Couldn't get SSH public key from AUR servers"
   fi
@@ -179,6 +209,7 @@ prepare_ssh() {
   # write the private SSH key out to disk
   if [ ! -z "${AUR_SSH_KEY}" ] ; then
     # write the key out to disk
+    info "Writing AUR SSH key to $HOME/.ssh/ssh_key"
     echo "${AUR_SSH_KEY}" > $HOME/.ssh/ssh_key
 
     # ensure correct permissions
@@ -228,7 +259,7 @@ compare_versions() {
   # $2 - latest package version string
 
   if [[ "${1#v}" == "${2#v}" ]]; then
-    log "latest upstream version is the same as the current package version, nothing to do"
+    info "latest upstream version is the same as the current package version, nothing to do"
     exit 0
   fi
 }
