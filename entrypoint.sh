@@ -124,7 +124,7 @@ main() {
   git config --global user.name "${GIT_USER}"
 
   # expose putToAur value to workflow output
-  set_output "PUSH_TO_AUR" "${INPUT_PUSH_TO_AUR}"
+  set_output "PUSH_TO_AUR" "${INPUT_PUSHTOAUR}"
 
   # if pushToAur input is 'true'
   if [ "${INPUT_PUSHTOAUR}" == "true" ] ; then
