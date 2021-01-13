@@ -142,14 +142,11 @@ main() {
     log "Committing changes to AUR repo"
     git commit -m "bump to ${LATEST_TAG}"
 
-    sleep 10h
-    exit 0
-
     # push changes to the AUR
     log "Pushing commit to AUR repo"
-    if ! git push ; then
-      err "Couldn't push commit to the AUR"
-    fi
+    #if ! git push ; then
+    #  err "Couldn't push commit to the AUR"
+    #fi
   fi
 
   # change directory back to the working directory
@@ -163,7 +160,7 @@ main() {
   if ! git add VERSION.env ; then
     err "Couldn't add VERSION.env"
   fi
-
+  sleep 10h
   # commit the file back
   log "Committing changes"
   git commit -m "update latest version to ${LATEST_TAG}"
@@ -173,9 +170,9 @@ main() {
 
   # push changes to the repo
   log "Pushing changes to source repo"
-  if ! git push ; then
-    err "Couldn't push commit"
-  fi
+  #if ! git push ; then
+  #  err "Couldn't push commit"
+  #fi
 }
 
 # helper functions
