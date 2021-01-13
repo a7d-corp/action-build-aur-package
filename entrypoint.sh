@@ -19,7 +19,7 @@ main() {
   fi
 
   # expose additional packages installed to the workflow output
-  set_output "ADDITIONAL_PACKAGES" "${INPUT_ADDITIONAL_PACKAGES}"
+  set_output "ADDITIONALPACKAGES" "${INPUT_ADDITIONALPACKAGES}"
 
   # prep SSH
   prepare_ssh
