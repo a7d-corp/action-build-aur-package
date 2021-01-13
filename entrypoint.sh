@@ -28,8 +28,12 @@ main() {
   source VARS.env
 
   # get tag of the latest version
+  log "Getting latest tag from Github API"
   LATEST_TAG=$(get_latest_version "${UPSTREAM_REPO}")
   check_response "${LATEST_TAG}" LATEST_TAG
+
+  # pick up the version of the last package build
+  source VERSION.env
 
   # expose the current version to the workflow output
   set_output "CURRENT_VER" "${CURRENT_VER}"
@@ -37,13 +41,12 @@ main() {
   # expose the latest vresion to the workflow output
   set_output "LATEST_VER" "${LATEST_TAG}"
 
-  # pick up the version of the last package build
-  source VERSION.env
-
-  ## compare version to version.txt
+  # compare version to version.txt
+  log "Comparing latest version to current version"
   compare_versions "${CURRENT_VERSION}" "${LATEST_TAG}"
 
   # get the asset download url
+  log "Getting asset URL from Github API"
   ASSET_URL=$(get_asset_url "${UPSTREAM_REPO}" "${ASSET_FILE_STUB}")
   check_response "${ASSET_URL}" ASSET_URL
 
@@ -51,9 +54,11 @@ main() {
   set_output "ASSET_URL" "${ASSET_URL}"
 
   # download the asset file
-  wget "${ASSET_URL}" -O tmp_asset_file
+  log "Downloading asset file from Github"
+  wget -q "${ASSET_URL}" -O tmp_asset_file
 
   # sha256sum the asset file
+  log "Compute sha256sum of the asset file"
   ASSET_SHA=$(sha256sum tmp_asset_file)
   check_response "${ASSET_SHA}" ASSET_SHA
 
@@ -61,6 +66,7 @@ main() {
   set_output "ASSET_SHA" "${ASSET_SHA}"
 
   # clone aur repo
+  log "Cloning AUR repo into ./aur_repo"
   export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i $HOME/.ssh/ssh_key"
   if ! git clone "${AUR_REPO}" aur_repo; then
     err "failed to clone AUR repo"
@@ -70,6 +76,7 @@ main() {
   cd aur_repo
 
   # update pkgbuild with sha256sum and version
+  log "Updating PKGBUILD"
   sed -i "s/^pkgver.*/pkgver=${LATEST_TAG}/g" PKGBUILD
   sed -i "s/^sha256sums.*/sha256sums=('${ASSET_SHA}')/g" PKGBUILD
 
@@ -77,11 +84,13 @@ main() {
   sed -i "s/^pkgrel.*/pkgrel=1/g" PKGBUILD
 
   # check pkgbuild with namcap
+  log "Testing PKGBUILD with namcap"
   if ! namcap PKGBUILD ; then
     err "PKGBUILD failed namcap check"
   fi
 
   # build package
+  log "Building package file"
   makepkg
 
   # store the package file name
@@ -94,32 +103,38 @@ main() {
   set_output "BUILT_PKG_FILE" "${BUILT_PKG_FILE}"
 
   # check package file with namcap
+  log "Testing package file with namcap"
   namcap "${BUILT_PKG_FILE}"
 
   # test installing package
+  log "Installing built package"
   pacman -U "${BUILT_PKG_FILE}"
 
   # prepare git config
   git config --global user.email "${GIT_EMAIL}"
   git config --global user.name "${GIT_USER}"
 
-  #
+  # expose putToAur value to workflow output
   set_output "PUSH_TO_AUR" "${INPUT_PUSH_TO_AUR}"
 
   # if pushToAur input is 'true'
   if [ "${INPUT_PUSHTOAUR}" == "true" ] ; then
     # update .SRCINFO
+    log "Updating .SRCINFO"
     makepkg --printsrcinfo > .SRCINFO
 
     # add files for committing
+    log "Staging files for committing"
     if ! git add PKGBUILD .SRCINFO ; then
       err "Couldn't add files for committing"
     fi
 
     # commit changes
+    log "Committing changes to AUR repo"
     git commit -m "bump to ${LATEST_TAG}"
 
     # push changes to the AUR
+    log "Pushing commit to AUR repo"
     if ! git push ; then
       err "Couldn't push commit to the AUR"
     fi
@@ -132,24 +147,27 @@ main() {
   echo "CURRENT_VERSION=${LATEST_TAG}" > VERSION.env
 
   # add the updated file for committing
+  log "Staging VERSION.env for committing"
   if ! git add VERSION.env ; then
-    err "Couldn't update VERSION.env"
+    err "Couldn't add VERSION.env"
   fi
 
   # commit the file back
+  log "Committing changes"
   git commit -m "update latest version to ${LATEST_TAG}"
 
   # don't use AUR-specific SSH command
   unset GIT_SSH_COMMAND
 
   # push changes to the repo
+  log "Pushing changes to source repo"
   if ! git push ; then
     err "Couldn't push commit"
   fi
 }
 
 # helper functions
-info() {
+log() {
   echo "INFO: $@"
 }
 
@@ -186,6 +204,7 @@ check_requirements() {
 install_packages() {
   # takes one input and exits non-zero if packages fail to install
   # $1 - space-separated list of packages to install
+  log "Installing additional packages"
   if ! pacman -Syuq --noconfirm --noconfirm "${1}" ; then
     err "Failed to install additional packages"
   fi
@@ -193,15 +212,15 @@ install_packages() {
 
 prepare_ssh() {
   # prepares the container for SSH
-  info "Preparing the container for SSH"
+  log "Preparing the container for SSH"
 
   if [ ! -d $HOME/.ssh ] ; then
-    info "Creating $HOME/.ssh"
+    log "Creating $HOME/.ssh"
     mkdir -m 0700 $HOME/.ssh
   fi
 
   # pull down the public key(s) from the AUR servers
-  info "Collecting SSH public key(s) from AUR server(s)"
+  log "Collecting SSH public key(s) from AUR server(s)"
   if ! ssh-keyscan -H aur.archlinux.org > $HOME/.ssh/known_hosts ; then
     err "Couldn't get SSH public key from AUR servers"
   fi
@@ -209,7 +228,7 @@ prepare_ssh() {
   # write the private SSH key out to disk
   if [ ! -z "${AUR_SSH_KEY}" ] ; then
     # write the key out to disk
-    info "Writing AUR SSH key to $HOME/.ssh/ssh_key"
+    log "Writing AUR SSH key to $HOME/.ssh/ssh_key"
     echo "${AUR_SSH_KEY}" > $HOME/.ssh/ssh_key
 
     # ensure correct permissions
@@ -259,7 +278,7 @@ compare_versions() {
   # $2 - latest package version string
 
   if [[ "${1#v}" == "${2#v}" ]]; then
-    info "latest upstream version is the same as the current package version, nothing to do"
+    log "latest upstream version is the same as the current package version, nothing to do"
     exit 0
   fi
 }
