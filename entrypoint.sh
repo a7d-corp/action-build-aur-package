@@ -138,6 +138,9 @@ main() {
       err "Couldn't add files for committing"
     fi
 
+    # show current repo state
+    git status
+    sleep 10h
     # commit changes
     log "Committing changes to AUR repo"
     git commit -m "bump to ${LATEST_TAG}"
