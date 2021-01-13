@@ -117,7 +117,7 @@ main() {
 
   # test installing package
   log "Installing built package"
-  pacman -U "${BUILT_PKG_FILE}"
+  pacman -Uq --noconfirm --noconfirm "${BUILT_PKG_FILE}"
 
   # prepare git config
   git config --global user.email "${GIT_EMAIL}"
