@@ -91,7 +91,7 @@ main() {
   if ! namcap PKGBUILD ; then
     err "PKGBUILD failed namcap check"
   fi
-
+ sleep 10h
   # build package as non-root user
   log "Building package file as user notroot"
   su notroot -c "makepkg"
