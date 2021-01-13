@@ -72,6 +72,9 @@ main() {
     err "failed to clone AUR repo"
   fi
 
+  # set ownership on the cloned repo so we can run as nonroot later
+  chown -R notroot.notroot aur_repo
+
   # move into the AUR checkout
   cd aur_repo
 
