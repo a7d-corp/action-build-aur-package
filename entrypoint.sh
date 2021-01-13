@@ -80,7 +80,7 @@ main() {
 
   # update pkgbuild with sha256sum and version
   log "Updating PKGBUILD"
-  sed -i "s/^pkgver.*/pkgver=${LATEST_TAG}/g" PKGBUILD
+  sed -i "s/^pkgver.*/pkgver=${LATEST_TAG#v}/g" PKGBUILD
   sed -i "s/^sha256sums.*/sha256sums=('${ASSET_SHA}')/g" PKGBUILD
 
   # drop pkgrel back to 1
