@@ -89,9 +89,9 @@ main() {
     err "PKGBUILD failed namcap check"
   fi
 
-  # build package
-  log "Building package file"
-  makepkg
+  # build package as non-root user
+  log "Building package file as user notroot"
+  su notroot -c "makepkg"
 
   # store the package file name
   BUILT_PKG_FILE=$(find -name \*pkg.tar.zst)
