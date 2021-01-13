@@ -129,8 +129,8 @@ main() {
   # if pushToAur input is 'true'
   if [ "${INPUT_PUSHTOAUR}" == "true" ] ; then
     # update .SRCINFO
-    log "Updating .SRCINFO"
-    makepkg --printsrcinfo > .SRCINFO
+    log "Updating .SRCINFO as user notroot"
+    su notroot -c "makepkg --printsrcinfo > .SRCINFO"
 
     # add files for committing
     log "Staging files for committing"
