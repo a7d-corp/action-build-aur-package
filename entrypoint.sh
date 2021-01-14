@@ -220,6 +220,21 @@ check_requirements() {
   if ! grep -qE 'UPSTREAM|AUR|PKG|STUB' VARS.env; then
     err "required variable not set in VARS.env file"
   fi
+
+  # check if AUR SSH key secret was set
+  if [ -z "${AUR_SSH_KEY}" ] ; then
+    err "AUR_SSH_KEY is not set"
+  fi
+
+  # check if git email address is set
+  if [ -z "${GIT_EMAIL}" ] ; then
+    err "GIT_EMAIL is not set"
+  fi
+
+  # check if git username is set
+  if [ -z "${GIT_USER}" ] ; then
+    err "GIT_USER is not set"
+  fi
 }
 
 install_packages() {
