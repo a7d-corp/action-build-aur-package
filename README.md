@@ -11,30 +11,30 @@ publishes a new release. It optionally pushes the update to the Arch User Reposi
 Build and push from a subdirectory in the repository:
 
 ```yaml
-      - name: build, test and push package
-        uses: glitchcrab/action-build-aur-package@main
-        with:
-          workdir: "./packagename-bin"
-          pushToAur: true
-        env:
-          AUR_SSH_KEY: ${{ secrets.AUR_SSH_KEY }}
-          GIT_EMAIL: ${{ secrets.GIT_EMAIL }}
-          GIT_USER: ${{ secrets.GIT_USER }}
+  - name: build, test and push package
+    uses: glitchcrab/action-build-aur-package@main
+    with:
+      workdir: "./packagename-bin"
+      pushToAur: true
+    env:
+      AUR_SSH_KEY: ${{ secrets.AUR_SSH_KEY }}
+      GIT_EMAIL: ${{ secrets.GIT_EMAIL }}
+      GIT_USER: ${{ secrets.GIT_USER }}
 ```
 
 Install additional packages required to build the package:
 
 ```yaml
-      - name: build, test and push package
-        uses: glitchcrab/action-build-aur-package@main
-        with:
-          workdir: "./packagename-bin"
-          pushToAur: true
-	  additionalPackages: "golangci-lint-bin go"
-        env:
-          AUR_SSH_KEY: ${{ secrets.AUR_SSH_KEY }}
-          GIT_EMAIL: ${{ secrets.GIT_EMAIL }}
-          GIT_USER: ${{ secrets.GIT_USER }}
+  - name: build, test and push package
+    uses: glitchcrab/action-build-aur-package@main
+    with:
+      workdir: "./packagename-bin"
+      pushToAur: true
+      additionalPackages: "golangci-lint-bin go"
+    env:
+      AUR_SSH_KEY: ${{ secrets.AUR_SSH_KEY }}
+      GIT_EMAIL: ${{ secrets.GIT_EMAIL }}
+      GIT_USER: ${{ secrets.GIT_USER }}
 ```
 
 ## Inputs
