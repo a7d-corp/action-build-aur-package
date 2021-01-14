@@ -139,17 +139,18 @@ main() {
     fi
 
     # show current repo state
+    log "Show current AUR repo status before committing changes"
     git status
-    sleep 10h
+
     # commit changes
     log "Committing changes to AUR repo"
     git commit -m "bump to ${LATEST_TAG}"
 
     # push changes to the AUR
     log "Pushing commit to AUR repo"
-    #if ! git push ; then
-    #  err "Couldn't push commit to the AUR"
-    #fi
+    if ! git push ; then
+      err "Couldn't push commit to the AUR"
+    fi
   fi
 
   # change directory back to the working directory
@@ -159,11 +160,18 @@ main() {
   log "Updating source repo with the latest version"
   echo "CURRENT_VERSION=${LATEST_TAG}" > VERSION.env
 
+  # copy the updated PKGBUILD into the source repo
+  cp -av aur_repo/PKGBUILD .
+
   # add the updated file for committing
-  log "Staging VERSION.env for committing"
-  if ! git add VERSION.env ; then
-    err "Couldn't add VERSION.env"
+  log "Staging files for for committing"
+  if ! git add VERSION.env PKGBUILD ; then
+    err "Couldn't stage files"
   fi
+
+  # show current repo state
+  log "Show current AUR repo status before committing changes"
+  git status
 
   # commit the file back
   log "Committing changes"
@@ -174,10 +182,9 @@ main() {
 
   # push changes to the repo
   log "Pushing changes to source repo"
-  #if ! git push ; then
-  #  err "Couldn't push commit"
-  #fi
-  sleep 10h
+  if ! git push ; then
+    err "Couldn't push commit"
+  fi
 }
 
 # helper functions
