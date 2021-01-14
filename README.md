@@ -75,3 +75,34 @@ Various secrets must be configured in the repo for this action to complete.
 
 - Description: 'Email to configure Git with'
 - Required: true
+
+## Repository format
+
+This action requires a specific repository format to function. The `workdir` must
+contain the following files:
+
+### `VERSION.env`
+
+- `CURRENT_VERSION`: The release tag of the current AUR version
+
+Example:
+
+```
+CURRENT_VERSION=v1.13.1
+```
+
+### `VARS.env`
+
+- `UPSTREAM_REPO`: the organisation and repo name of the upstream Github repo
+- `AUR_REPO`: The AUR Git repo URL
+- `PKG_NAME`: The name of the package in the AUR
+- `ASSET_FILE_STUB`: A unique portion of the source filename
+
+Example:
+
+```
+UPSTREAM_REPO="stern/stern"
+AUR_REPO="ssh://aur@aur.archlinux.org/stern-bin.git"
+PKG_NAME="stern-bin"
+ASSET_FILE_STUB="_linux_amd64.tar.gz"
+````
