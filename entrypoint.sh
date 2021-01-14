@@ -151,39 +151,39 @@ main() {
     if ! git push ; then
       err "Couldn't push commit to the AUR"
     fi
-  fi
 
-  # change directory back to the working directory
-  cd "${WORKDIR}"
+    # change directory back to the working directory
+    cd "${WORKDIR}"
 
-  # update repo with the latest built version
-  log "Updating source repo with the latest version"
-  echo "CURRENT_VERSION=${LATEST_TAG}" > VERSION.env
+    # update repo with the latest built version
+    log "Updating source repo with the latest version"
+    echo "CURRENT_VERSION=${LATEST_TAG}" > VERSION.env
 
-  # copy the updated PKGBUILD into the source repo
-  cp -av aur_repo/PKGBUILD .
+    # copy the updated PKGBUILD into the source repo
+    cp -av aur_repo/PKGBUILD .
 
-  # add the updated file for committing
-  log "Staging files for for committing"
-  if ! git add VERSION.env PKGBUILD ; then
-    err "Couldn't stage files"
-  fi
+    # add the updated file for committing
+    log "Staging files for for committing"
+    if ! git add VERSION.env PKGBUILD ; then
+      err "Couldn't stage files"
+    fi
 
-  # show current repo state
-  log "Show current AUR repo status before committing changes"
-  git status
+    # show current repo state
+    log "Show current AUR repo status before committing changes"
+    git status
 
-  # commit the file back
-  log "Committing changes"
-  git commit -m "update latest version to ${LATEST_TAG}"
+    # commit the file back
+    log "Committing changes"
+    git commit -m "update latest version to ${LATEST_TAG}"
 
-  # don't use AUR-specific SSH command
-  unset GIT_SSH_COMMAND
+    # don't use AUR-specific SSH command
+    unset GIT_SSH_COMMAND
 
-  # push changes to the repo
-  log "Pushing changes to source repo"
-  if ! git push ; then
-    err "Couldn't push commit"
+    # push changes to the repo
+    log "Pushing changes to source repo"
+    if ! git push ; then
+      err "Couldn't push commit"
+    fi
   fi
 }
 
