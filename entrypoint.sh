@@ -18,8 +18,8 @@ main() {
     install_packages "${INPUT_ADDITIONALPACKAGES}"
   fi
 
-  # expose additional packages installed to the workflow output
-  set_output "ADDITIONALPACKAGES" "${INPUT_ADDITIONALPACKAGES}"
+  # log additional packages installed
+  log "Additional packages installed: ${INPUT_ADDITIONALPACKAGES}"
 
   # prep SSH
   prepare_ssh
@@ -27,11 +27,14 @@ main() {
   # pick up variables needed to run
   source VARS.env
 
-  # expose the sourced vars to the workflow output
-  set_output "UPSTREAM_REPO" "${UPSTREAM_REPO}"
-  set_output "AUR_REPO" "${AUR_REPO}"
-  set_output "PKG_NAME" "${PKG_NAME}"
-  set_output "ASSET_FILE_STUB" "${ASSET_FILE_STUB}"
+  # log the sourced vars
+  log "UPSTREAM_REPO: ${UPSTREAM_REPO}"
+  log "AUR_REPO: ${AUR_REPO}"
+  log "PKG_NAME: ${PKG_NAME}"
+  log "ASSET_FILE_STUB: ${ASSET_FILE_STUB}"
+
+  # expose the AUR package name as an output
+  set_output "aurPackageName" "${PKG_NAME}"
 
   # get tag of the latest version
   log "Getting latest tag from Github API"
@@ -41,11 +44,11 @@ main() {
   # pick up the version of the last package build
   source VERSION.env
 
-  # expose the current version to the workflow output
-  set_output "CURRENT_VERSION" "${CURRENT_VERSION}"
+  # expose the current version as an output
+  set_output "currentVersion" "${CURRENT_VERSION}"
 
-  # expose the latest vresion to the workflow output
-  set_output "LATEST_VER" "${LATEST_TAG}"
+  # expose the latest version as an output
+  set_output "latestVersion" "${LATEST_TAG}"
 
   # compare version to version.txt
   log "Comparing latest version to current version"
@@ -56,8 +59,8 @@ main() {
   ASSET_URL=$(get_asset_url "${UPSTREAM_REPO}" "${ASSET_FILE_STUB}")
   check_response "${ASSET_URL}" ASSET_URL
 
-  # expose the asset URL to the workflow output
-  set_output "ASSET_URL" "${ASSET_URL}"
+  # log the asset URL
+  log "ASSET_URL: ${ASSET_URL}"
 
   # download the asset file
   log "Downloading asset file from Github"
@@ -68,8 +71,8 @@ main() {
   ASSET_SHA=$(sha256sum tmp_asset_file | cut -d ' ' -f 1)
   check_response "${ASSET_SHA}" ASSET_SHA
 
-  # expose the asset file SHA to the workflow output
-  set_output "ASSET_SHA" "${ASSET_SHA}"
+  # log the asset file SHA
+  log "ASSET_SHA: ${ASSET_SHA}"
 
   # clone aur repo
   log "Cloning AUR repo into ./aur_repo"
@@ -108,8 +111,8 @@ main() {
   # ensure a filename was discovered
   check_response "${BUILT_PKG_FILE}" "BUILT_PKG_FILE"
 
-  # expose the built package name to the workflow output
-  set_output "BUILT_PKG_FILE" "${BUILT_PKG_FILE}"
+  # log the built package name
+  log "BUILT_PKG_FILE: ${BUILT_PKG_FILE}"
 
   # check package file with namcap
   log "Testing package file with namcap"
@@ -123,8 +126,8 @@ main() {
   git config --global user.email "${GIT_EMAIL}"
   git config --global user.name "${GIT_USER}"
 
-  # expose putToAur value to workflow output
-  set_output "PUSH_TO_AUR" "${INPUT_PUSHTOAUR}"
+  # log putToAur value
+  log "PUSH_TO_AUR: ${INPUT_PUSHTOAUR}"
 
   # if pushToAur input is 'true'
   if [ "${INPUT_PUSHTOAUR}" == "true" ] ; then
@@ -149,7 +152,12 @@ main() {
     # push changes to the AUR
     log "Pushing commit to AUR repo"
     if ! git push ; then
+      # expose the push status as an output
+      set_output "aurUpdate" "false"
       err "Couldn't push commit to the AUR"
+    else
+      # expose the push status as an output
+      set_output "aurUpdated" "true"
     fi
 
     # change directory back to the working directory
