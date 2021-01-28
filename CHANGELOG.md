@@ -7,6 +7,12 @@ and this project's packages adheres to [Semantic Versioning](http://semver.org/s
 
 ## [Unreleased]
 
+## [0.3.0] - 2021-01-28
+
+### Added
+
+- Added outputs to action
+
 ## [0.2.0] - 2021-01-14
 
 ### Added
@@ -23,6 +29,7 @@ and this project's packages adheres to [Semantic Versioning](http://semver.org/s
 
 - Basic initial working action.
 
-[Unreleased]: https://github.com/glitchcrab/action-build-aur-package/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/glitchcrab/action-build-aur-package/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/glitchcrab/action-build-aur-package/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/glitchcrab/action-build-aur-package/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/glitchcrab/action-build-aur-package/compare/v0.1.0

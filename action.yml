@@ -19,3 +19,12 @@ inputs:
 runs:
   using: 'docker'
   image: 'Dockerfile'
+outputs:
+  aurPackageName:
+    description: 'The AUR package name'
+  aurUpdated:
+    description: 'Boolean if the AUR package was updated'
+  currentVersion:
+    description: 'The current AUR version'
+  latestVersion:
+    description: 'The latest available version'

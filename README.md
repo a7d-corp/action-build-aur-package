@@ -57,6 +57,24 @@ Install additional packages required to build the package:
 - Required: false
 - Default: './'
 
+## Outputs
+
+### `aurPackageName`
+
+- The AUR package name.
+
+### `aurUpdated`
+
+- Boolean if the AUR package was updated.
+
+### `currentVersion`
+
+- The current AUR version.
+
+### `latestVersion`
+
+- The latest available version.
+
 ## Secrets
 
 Various secrets must be configured in the repo for this action to complete.
