@@ -153,7 +153,7 @@ main() {
     log "Pushing commit to AUR repo"
     if ! git push ; then
       # expose the push status as an output
-      set_output "aurUpdate" "false"
+      set_output "aurUpdated" "false"
       err "Couldn't push commit to the AUR"
     else
       # expose the push status as an output
@@ -192,6 +192,8 @@ main() {
     if ! git push ; then
       err "Couldn't push commit"
     fi
+  else
+    set_output "aurUpdated" "false"
   fi
 }
 
