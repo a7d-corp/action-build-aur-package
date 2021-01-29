@@ -325,6 +325,7 @@ compare_versions() {
 
   if [[ "${1#v}" == "${2#v}" ]]; then
     log "latest upstream version is the same as the current package version, nothing to do"
+    set_output "aurUpdated" "false"
     exit 0
   fi
 }
