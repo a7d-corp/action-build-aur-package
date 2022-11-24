@@ -309,12 +309,12 @@ get_asset_url() {
       -H "Authorization: token ${PERSONAL_ACCESS_TOKEN}"
       "https://api.github.com/repos/${1}/releases/latest" \
       | jq -r --arg ASSET_FILE "${2}" \
-      '.assets[] | select(.name | contains($ASSET_FILE)) | .browser_download_url'
+      '.assets[] | select(.name | endswith($ASSET_FILE)) | .browser_download_url'
   else
     curl --silent \
       "https://api.github.com/repos/${1}/releases/latest" \
       | jq -r --arg ASSET_FILE "${2}" \
-      '.assets[] | select(.name | contains($ASSET_FILE)) | .browser_download_url'
+      '.assets[] | select(.name | endswith($ASSET_FILE)) | .browser_download_url'
   fi
 }
 

@@ -7,6 +7,10 @@ and this project's packages adheres to [Semantic Versioning](http://semver.org/s
 
 ## [Unreleased]
 
+### Changed
+
+- Only match download URLs ending in the asset file name
+
 ## [0.3.0] - 2021-01-28
 
 ### Added
