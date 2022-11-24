@@ -7,6 +7,8 @@ and this project's packages adheres to [Semantic Versioning](http://semver.org/s
 
 ## [Unreleased]
 
+## [0.4.0] - 2022-11-24
+
 ### Changed
 
 - Only match download URLs ending in the asset file name
